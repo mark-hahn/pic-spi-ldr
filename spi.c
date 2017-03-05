@@ -8,7 +8,7 @@
 char         cmd;
 unsigned int wordAddr;
 char         buf[MAX_BYTES_IN_BLOCK];
-#define BUF_START_IDX -3
+#define      BUF_START_IDX -3
 signed char  packetByteIdx;  // -3: cmd, -2..-1: wordAddress, 0..: data
 
 void spiInit() {
@@ -29,16 +29,16 @@ void spiInit() {
   SSP1CON3bits.BOEN  = 0; // disable buffer input overflow check (SSPOV))
   /* From datasheet: Before enabling the module in SPI Slave mode, the clock
    line must match the proper Idle state (CKP) */
-//  while(SPI_CLK);
+  while(SPI_CLK);
   
   SPI_ENBL = 1; // enable SPI
   // start on word boundary
-//  while(!SPI_SS);
+  while(!SPI_SS);
   
   SPI_OVFLW     = 0; // clear errors
   SPI_WCOL      = 0;
   SPI_SS_IOC    = 1; // SS rising IOC
-  SPI_DATA_IF   = 0; // clear int flags
+  SPI_DATA_IF   = 0; // clear int flag for data byte
   SPI_SS_IOC_IF = 0; // IOC int flag for specific A7 SS pin
   
   packetByteIdx = BUF_START_IDX;
@@ -47,6 +47,7 @@ void spiInit() {
 void chkSpi() {
   if(SPI_DATA_IF) {
     // SPI data byte received
+//    for(char i=0; i < 2; i++) FAN_LAT = !FAN_LAT;    
     char byteIn = SPI_DATA_BUF;
     SPI_DATA_IF = 0;  
     SPI_WCOL = 0; // clear error
@@ -66,12 +67,13 @@ void chkSpi() {
       case WRITE_CMD: flash_memory_write(wordAddr, buf); break;
       case ERASE_CMD: flash_memory_erase(wordAddr);      break;
       case RESET_CMD: 
-        for(char i=0; i < 6; i++) FAN_LAT = !FAN_LAT;
+        for(char i=0; i < 8; i++) FAN_LAT = !FAN_LAT;
         RESET(); // goodbye cruel world
     }
     // cpu may have just resumed after flash delay froze it
     // make sure we are in sync with data
     while(!SPI_SS);
+//    for(char i=0; i < 4; i++) FAN_LAT = !FAN_LAT;
     SPI_DATA_BUF  = STATUS_FLASHING; 
     packetByteIdx = BUF_START_IDX;
     SPI_SS_IOC_IF = 0;

@@ -57,13 +57,13 @@ void main(void) {
   
   // after first app load, to run bootloader the app should erase 0x200
   if(haveApp()) {   // jump to app
-    for(char i=0; i < 4; i++) FAN_LAT = !FAN_LAT;
+//    for(char i=0; i < 6; i++) FAN_LAT = !FAN_LAT;
     STKPTR = 0x1F;
     asm ("pagesel " str(NEW_RESET_VECTOR));
     asm ("goto  "  str(NEW_RESET_VECTOR));
   }
   // run bootloader
-  for(char i=0; i < 2; i++) FAN_LAT = !FAN_LAT;
+//  for(char i=0; i < 4; i++) FAN_LAT = !FAN_LAT;
   spiInit();
   while(1) chkSpi();
 }

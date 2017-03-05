@@ -14,6 +14,7 @@ char haveApp() {
   NVMCON1 = 1;  // set RD bit and clear other write stuff
   return ((NVMDATH << 8 | NVMDATL) != 0x3FFF);
 //  return RA5;
+//  return 0;
 }
 
 void flash_memory_erase (unsigned int wordAddress) {
